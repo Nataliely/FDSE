@@ -28,7 +28,6 @@ iterations = parse.(Int, keys(file_xy["timeseries/t"]))
 
 t_save = zeros(length(iterations))
 u_mid = zeros(length(u_ic[:, 1, 1]), length(iterations))
-#v_mid = zeros(length(v_ic[:, 1, 1]), length(iterations))
 
 # Here, we loop over all iterations
 anim = @animate for (i, iter) in enumerate(iterations)
@@ -36,23 +35,17 @@ anim = @animate for (i, iter) in enumerate(iterations)
     @info "Drawing frame $i from iteration $iter..."
 
     u_xy = file_xy["timeseries/u/$iter"][:, :, 1];
-    #v_xy = file_xy["timeseries/v/$iter"][:, :, 1];
-    #w_xy = file_xy["timeseries/w/$iter"][:, :, 1];
-
+    
     t = file_xy["timeseries/t/$iter"];
 
     # Save some variables to plot at the end
-    u_mid[:,i] = u_xy[:, 64, 1]
+    u_mid[: , i] = u_xy[:, 64, 1]
     t_save[i] = t # save the time
 
         u_xy_plot = Plots.heatmap(xu, yu, u_xy'; color = :balance, xlabel = "x", ylabel = "y", aspect_ratio = :equal);  
-        #v_xy_plot = Plots.heatmap(xv, yv, v_xy'; color = :balance, xlabel = "x", ylabel = "y", aspect_ratio = :equal); 
-        #w_xy_plot = Plots.heatmap(xw, yw, w_xy'; color = :balance, xlabel = "x", ylabel = "y", aspect_ratio = :equal); 
         
     u_title = @sprintf("u, t = %s", round(t));
-    #v_title = @sprintf("v, t = %s", round(t));
-    #w_title = @sprintf("w, t = %s", round(t));
-
+    
     iter == iterations[end] && close(file_xy)
 end
 
@@ -60,5 +53,4 @@ end
 mp4(anim, "rossbywave.mp4", fps = 20) # hide
 
 # Now, make a plot of our saved variables
-Plots.heatmap(xu, t_save, u_mid', xlabel="x", ylabel="t", title="u at y=Ly/2")
-#Plots.heatmap(xv, t_save, v_mid', xlabel="x", ylabel="t", title="v at y=Ly/2")
+Plots.heatmap(xu / 1kilometer, t_save / 1day, u_mid', xlabel="x (km)", ylabel="t (days)", title="u at y=Ly/2")
